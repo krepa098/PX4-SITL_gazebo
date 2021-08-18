@@ -1,5 +1,5 @@
 <sdf version='1.5'>
-  <model name='crazyflie'>
+  <model name='crazyflie_hitl'>
     <!-- Crazyflie body -->
     <link name='base_link'>
       <pose>0 0 0 0 0 0</pose>
@@ -355,6 +355,54 @@
       <motorSpeedPubTopic>/motor_speed/1</motorSpeedPubTopic>
       <rotorVelocitySlowdownSim>100</rotorVelocitySlowdownSim>
     </plugin>
+    <model name='gps0'>
+      <link name='link'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose frame=''>0 0 0 0 -0 0</pose>
+          <mass>0.001</mass>
+          <inertia>
+            <ixx>2.1733e-07</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>2.1733e-07</iyy>
+            <iyz>0</iyz>
+            <izz>1.8e-08</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <cylinder>
+              <radius>0.01</radius>
+              <length>0.002</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Black</name>
+              <uri>__default__</uri>
+            </script>
+          </material>
+        </visual>
+        <sensor name='gps' type='gps'>
+          <pose frame=''>0 0 0 0 -0 0</pose>
+          <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
+            <robotNamespace/>
+            <gpsNoise>1</gpsNoise>
+            <gpsXYRandomWalk>2.0</gpsXYRandomWalk>
+            <gpsZRandomWalk>4.0</gpsZRandomWalk>
+            <gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
+            <gpsZNoiseDensity>0.0004</gpsZNoiseDensity>
+            <gpsVXYNoiseDensity>0.2</gpsVXYNoiseDensity>
+            <gpsVZNoiseDensity>0.4</gpsVZNoiseDensity>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+    <joint name='gps0_joint' type='fixed'>
+      <parent>base_link</parent>
+      <child>gps0::link</child>
+    </joint>
     <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
       <robotNamespace/>
     </plugin>
@@ -374,20 +422,25 @@
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace/>
       <imuSubTopic>/imu</imuSubTopic>
-      <gpsSubTopic>/gps</gpsSubTopic>
       <magSubTopic>/mag</magSubTopic>
       <baroSubTopic>/baro</baroSubTopic>
       <mavlink_addr>INADDR_ANY</mavlink_addr>
       <mavlink_udp_port>14560</mavlink_udp_port>
+      <mavlink_tcp_port>4560</mavlink_tcp_port>
       <serialEnabled>true</serialEnabled>
-      <serialDevice>/dev/ttyACM0</serialDevice>
+      <serialDevice>/tmp/ttyACM0</serialDevice>
       <baudRate>921600</baudRate>
       <qgc_addr>INADDR_ANY</qgc_addr>
       <qgc_udp_port>14550</qgc_udp_port>
-      <hil_mode>true</hil_mode>
-      <hil_state_level>false</hil_state_level>
-      <enable_lockstep>true</enable_lockstep>
-      <use_tcp>true</use_tcp>
+      <sdk_addr>INADDR_ANY</sdk_addr>
+      <sdk_udp_port>14540</sdk_udp_port>
+      <hil_mode>1</hil_mode>
+      <hil_state_level>0</hil_state_level>
+      <vehicle_is_tailsitter>0</vehicle_is_tailsitter>
+      <send_vision_estimation>0</send_vision_estimation>
+      <send_odometry>1</send_odometry>
+      <enable_lockstep>1</enable_lockstep>
+      <use_tcp>1</use_tcp>
       <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       <control_channels>
         <channel name='rotor1'>
