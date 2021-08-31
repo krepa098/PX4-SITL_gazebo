@@ -246,7 +246,6 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
   DEPENDS ${rotors_description_dir}/urdf/iris_base.xacro
   DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
   )
-add_custom_target(sdf ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly/firefly.sdf
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
