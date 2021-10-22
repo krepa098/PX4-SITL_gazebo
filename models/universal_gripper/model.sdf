@@ -1,0 +1,130 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="universal_gripper">
+    <pose>0 0 0.2 0 0 0</pose>
+    <static>false</static>
+    <plugin filename="libuniversal_gripper_plugin.so" name="universal_gripper_plugin"/>
+    <link name="base_link">
+      <pose>0 0 0 0 0 0</pose>
+      <!--<collision name="collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://universal_gripper/meshes/universal_gripper_collision.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>-->
+      <inertial>
+        <inertia>
+          <ixx>0.00002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00002</iyy>
+          <iyz>0</iyz>
+          <izz>0.00002</izz>
+        </inertia>
+        <mass>0.1</mass>
+      </inertial>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+           <uri>model://universal_gripper/meshes/universal_gripper.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <!-- disable physical collision -->
+      <!--<surface>
+        <contact>
+          <collide_without_contact>true</collide_without_contact>
+        </contact>
+      </surface>-->
+    </link>
+    
+    <link name="balloon">
+      <pose frame="base_link">0 0 -0.02 0 0 0</pose>
+      <inertial>
+          <inertia>
+            <ixx>0.00002</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.00002</iyy>
+            <iyz>0</iyz>
+            <izz>0.00002</izz>
+          </inertia>
+          <mass>0.1</mass>
+       </inertial>
+    </link>
+    
+    <joint name="joint1" type="prismatic">
+      <parent>base_link</parent>
+      <child>balloon</child>
+      <sensor name="load_cell" type="force_torque">
+        <visualize>true</visualize>
+      </sensor>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0.02</upper>
+          <!--<effort>3000</effort>-->
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>100</spring_stiffness>
+          <damping>0.7</damping>
+        </dynamics>
+      </axis>
+    </joint>
+       
+    <!-- the cylindrical contact surface that can move in z-direction -->
+    <link name="balloon_contact">
+      <pose frame="balloon">0 0 -0.03 0 0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.002</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.002</iyy>
+            <iyz>0</iyz>
+            <izz>0.002</izz>
+          </inertia>
+          <mass>0.1</mass>
+        </inertial>
+        <!-- 
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.030</radius>
+              <length>0.020</length>
+            </cylinder>
+          </geometry>
+        </visual>-->
+       <collision name="contact_sensor_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.040</radius>
+              <length>0.020</length>
+          </cylinder>
+        </geometry>
+        <!-- disable physical collision -->
+        <!-- <surface>
+          <contact>
+            <collide_without_contact>true</collide_without_contact>
+          </contact>
+        </surface> -->
+      </collision>
+      <sensor name="contact_sensor" type="contact">
+        <contact>
+          <collision>contact_sensor_collision</collision>
+        </contact>
+      </sensor>
+    </link>
+    
+    <joint name="balloon_joint" type="fixed">
+      <parent>balloon</parent>
+      <child>balloon_contact</child>
+    </joint>
+      
+  </model>
+</sdf>
+

@@ -41,6 +41,8 @@ option(BUILD_ROS_INTERFACE "Enable building ROS dependent plugins" OFF)
 option(SEND_VISION_ESTIMATION_DATA "Send Mavlink VISION_POSITION_ESTIMATE msgs" OFF)
 option(SEND_ODOMETRY_DATA "Send Mavlink ODOMETRY msgs" OFF)
 
+set(BUILD_ROS_INTERFACE ON)
+
 ## System dependencies are found with CMake's conventions
 find_package(Boost 1.58 REQUIRED COMPONENTS system thread filesystem)
 find_package(gazebo REQUIRED)
@@ -257,7 +259,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly/firefly.sdf
   DEPENDS ${rotors_description_dir}/urdf/firefly_base.xacro
   DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
   )
- 
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_hil/firefly_hil.sdf
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND rm -f ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_hil/firefly_hil.sdf
@@ -268,7 +270,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_hil/firefly
   DEPENDS ${rotors_description_dir}/urdf/firefly_base.xacro
   DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
   )
-  
+
 add_custom_target(sdf ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly/firefly.sdf ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_hil/firefly_hil.sdf)
 
 #-----------#
@@ -405,8 +407,10 @@ target_link_libraries(gazebo_opticalflow_plugin ${OpticalFlow_LIBS})
 # Current plugins that can be used with ROS interface: gazebo_motor_failure_plugin
 if (BUILD_ROS_INTERFACE)
   add_library(gazebo_motor_failure_plugin SHARED src/gazebo_motor_failure_plugin.cpp)
+  add_library(universal_gripper_plugin SHARED src/universal_gripper/gazebo_universal_gripper.cpp)
   target_link_libraries(gazebo_motor_failure_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
-  list(APPEND plugins gazebo_motor_failure_plugin)
+  target_link_libraries(universal_gripper_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
+  list(APPEND plugins gazebo_motor_failure_plugin universal_gripper_plugin)
   message(STATUS "adding gazebo_motor_failure_plugin to build")
 
   include_directories(
