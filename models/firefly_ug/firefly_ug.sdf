@@ -1,15 +1,24 @@
-<sdf version='1.5'>
+<sdf version='1.7'>
   <model name='firefly_ug'>
+    <plugin name="vision_plugin" filename="libgazebo_vision_plugin.so">
+      <robotNamespace></robotNamespace>
+      <pubRate>30</pubRate>
+      <randomWalk>0.001</randomWalk>
+      <noiseDensity>0.0001</noiseDensity>
+      <corellationTime>60.0</corellationTime>
+    </plugin>
+    
     <include>
-      <uri>model://firefly</uri>
+      <uri>model://firefly_gt</uri>
       <pose>0 0 0.1 0 0 0</pose>
     </include>
+ 
     <include>
       <uri>model://universal_gripper</uri>
       <pose>0 0 0.05 0 0 0</pose>
     </include>
     <joint name="ug_joint" type="fixed">
-      <parent>firefly::base_link</parent>
+      <parent>firefly_gt::base_link</parent>
       <child>universal_gripper::base_link</child>
     </joint>
   </model>

@@ -56,6 +56,7 @@
   <xacro:arg name='visual_material' default='DarkGrey' />
   <xacro:arg name='enable_mavlink_interface' default='true' />
   <xacro:arg name='enable_wind' default='false' />
+  <xacro:arg name='enable_gps' default='true' />
   <!-- The following causes segfault with multiple vehicles if defaults to true!!! -->
   <xacro:arg name='enable_ground_truth' default='false' />
   <xacro:arg name='enable_logging' default='false' />
@@ -81,21 +82,23 @@
   </xacro:if>
 
   <!-- Mount a GPS module. -->
-  <xacro:gps_macro
-    gps_name="gps0"
-    pos_x="0.0"
-    pos_y="0.0"
-    pos_z="0.0"
-    gps_noise="true"
-    gps_xy_random_walk="2.0"
-    gps_z_random_walk="4.0"
-    gps_xy_noise_density="2.0e-4"
-    gps_z_noise_density="4.0e-4"
-    gps_vxy_noise_density="0.2"
-    gps_vz_noise_density="0.4"
-    namespace=""
-    parent_link="base_link">
-  </xacro:gps_macro>
+  <xacro:if value="$(arg enable_gps)">
+    <xacro:gps_macro
+      gps_name="gps0"
+      pos_x="0.0"
+      pos_y="0.0"
+      pos_z="0.0"
+      gps_noise="true"
+      gps_xy_random_walk="2.0"
+      gps_z_random_walk="4.0"
+      gps_xy_noise_density="2.0e-4"
+      gps_z_noise_density="4.0e-4"
+      gps_vxy_noise_density="0.2"
+      gps_vz_noise_density="0.4"
+      namespace=""
+      parent_link="base_link">
+    </xacro:gps_macro>
+  </xacro:if>
 
   <!-- Instantiate groundtruth plugin. -->
   <xacro:groundtruth_plugin_macro
