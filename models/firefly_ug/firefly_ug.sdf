@@ -1,0 +1,16 @@
+<sdf version='1.5'>
+  <model name='firefly_ug'>
+    <include>
+      <uri>model://firefly</uri>
+      <pose>0 0 0.1 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://universal_gripper</uri>
+      <pose>0 0 0.05 0 0 0</pose>
+    </include>
+    <joint name="ug_joint" type="fixed">
+      <parent>firefly::base_link</parent>
+      <child>universal_gripper::base_link</child>
+    </joint>
+  </model>
+</sdf>
