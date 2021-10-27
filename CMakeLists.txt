@@ -329,7 +329,7 @@ set(mav_msgs
   msgs/MotorSpeed.proto
   )
 set(nav_msgs msgs/Odometry.proto)
-set(physics_msgs msgs/Wind.proto)
+set(physics_msgs msgs/Wind.proto msgs/UniversalGripperStatus.proto msgs/UniversalGripperCommand.proto)
 set(std_msgs msgs/Int32.proto)
 set(sensor_msgs
   msgs/Airspeed.proto

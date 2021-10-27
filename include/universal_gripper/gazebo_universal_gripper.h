@@ -17,9 +17,8 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
 
-// Tr: 'roslaunch universal_gripper spawn_uav_gripper.launch'
-// Note:    rotors_description/urdf/multirotor_base.xacro
-//          rotors_description/urdf/firefly.xacro
+#include <UniversalGripperCommand.pb.h>
+#include <UniversalGripperStatus.pb.h>
 
 namespace gazebo
 {
@@ -39,6 +38,8 @@ enum class GripperCommand
 class UniversalGripper : public ModelPlugin
 {
    public:
+    typedef const boost::shared_ptr<const physics_msgs::msgs::UniversalGripperCommand> CommandPtr;
+
     UniversalGripper();
     void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
@@ -49,6 +50,8 @@ class UniversalGripper : public ModelPlugin
 
     // Pointer to the model
    private:
+    void CommandCallback(CommandPtr& msg);
+
     physics::ModelPtr m_model;
     // physics::JointPtr m_attachement_joint;
     physics::JointPtr m_gripper_joint;
@@ -72,6 +75,9 @@ class UniversalGripper : public ModelPlugin
     // Pointer to the update event connection
    private:
     event::ConnectionPtr m_updateConnection;
+    transport::NodePtr m_node_handle;
+    transport::PublisherPtr m_ug_status_pub;
+    transport::SubscriberPtr m_ug_command_sub;
 };
 
 }  // namespace gazebo

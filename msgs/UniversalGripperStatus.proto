@@ -1,0 +1,9 @@
+syntax = "proto2";
+package physics_msgs.msgs;
+
+message UniversalGripperStatus
+{
+  required uint32 current_state = 1;
+  required uint32 next_state = 2;
+  required float activation_force = 3;
+}
