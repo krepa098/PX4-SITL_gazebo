@@ -8,11 +8,9 @@ void UniversalGripper::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
     // Note gzdbg needs: extra_gazebo_args=:"--verbose"
     gzdbg << "UG Plugin loaded" << std::endl;
-    // ROS_INFO_NAMED("UG", "plugin loaded");
 
     m_model = _parent;
     m_release_time = m_model->GetWorld()->SimTime();
-    m_last_status_sent = m_model->GetWorld()->SimTime();
 
     std::string namespace_ = "";
     if (_sdf->HasElement("robotNamespace"))
@@ -33,7 +31,6 @@ void UniversalGripper::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     m_base_link = m_model->GetLink("universal_gripper::base_link");
     m_collision_link = m_model->GetLink("universal_gripper::balloon_contact");
     m_balloon_joint = m_model->GetJoint("universal_gripper::balloon_joint");
-    // m_attachement_joint = m_model->GetJoint("universal_gripper::base_link::attachement_joint");
 
     if (!m_base_link)
         gzthrow("'universal_gripper::base_link' not found");
@@ -41,8 +38,6 @@ void UniversalGripper::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         gzthrow("'universal_gripper::balloon_contact' not found");
     if (!m_balloon_joint)
         gzthrow("'universal_gripper::balloon_joint' not found");
-    // if (!m_attachement_joint)
-    //     gzerr << "'balloon_contact' not found" << std::endl;
 
     // enable feedback generation on that joint
     m_balloon_joint->SetProvideFeedback(true);
@@ -54,81 +49,10 @@ void UniversalGripper::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     m_updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&UniversalGripper::OnUpdate, this));
-
-    // setup ROS
-    // if (!ros::isInitialized())
-    // {
-    //     int argc = 0;
-    //     char** argv = NULL;
-    //     ros::init(argc, argv, m_model->GetName(), ros::init_options::NoSigintHandler);
-    // }
-
-    // // create the ROS node
-    // m_ros_node.reset(new ros::NodeHandle(m_model->GetName()));
-
-    // publishers
-    // m_ros_pub_activation_force = m_ros_node->advertise<std_msgs::Float64>("activation_force", 10);
-    // m_ros_pub_contact = m_ros_node->advertise<std_msgs::String>("contact", 10);
-    // m_ros_pub_status = m_ros_node->advertise<std_msgs::String>("status", 10);
-
-    // list our private parameters
-    // std::vector<std::string> names;
-    // m_ros_node->getParamNames(names);
-    // for (auto name : names)
-    // {
-    //     gzdbg << "  param: " << name << std::endl;
-    // }
-
-    // bool disable_collisions = false;
-    // m_ros_node->getParam("/universal_gripper_spawner/disable_collision", disable_collisions);
-    // if (disable_collisions)
-    // {
-    //     gzdbg << "  no collision: yes" << std::endl;
-    //     for (auto l : m_model->GetLinks())
-    //     {
-    //         if (l->GetCollisionById(0))
-    //             l->GetCollisionById(0)->GetSurface()->collideWithoutContact = true;
-    //     }
-    // }
-
-    // listen to commands
-    // commands are strings like 'open', 'close'
-    // m_gripper_commands = m_ros_node->subscribe<std_msgs::String>(
-    //     "cmd", 10, [this](const ros::MessageEvent<std_msgs::String const>& msg) {
-    //         auto const_ref_msg = *(msg.getConstMessage().get());
-    //         // gzdbg << const_ref_msg.data << std::endl;
-
-    //         if (const_ref_msg.data == "close")
-    //             m_gripper_next_command = GripperCommand::Close;
-    //         if (const_ref_msg.data == "open")
-    //             m_gripper_next_command = GripperCommand::Open;
-    //     });
 }
 
 void UniversalGripper::OnUpdate()
 {
-        // send status message
-    //if ((m_model->GetWorld()->SimTime() - m_last_status_sent).Float() > 0.1f)
-    {
-        m_last_status_sent = m_model->GetWorld()->SimTime();
-        physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
-        ug_status_msg.set_activation_force(0);
-        ug_status_msg.set_current_state(uint32_t(m_gripper_status));
-        ug_status_msg.set_next_state(uint32_t(m_gripper_status));
-        m_ug_status_pub->Publish(ug_status_msg);
-    }
-return;
-    // Note: this is not the same thread as the messages passed from gazebo
-
-    // only report the object we have already gripped, or nothing
-    // {
-    //     std_msgs::String msg;
-    //     msg.data = m_gripper_joint->GetChild() ? m_gripper_joint->GetChild()->GetModel()->GetName() + ":" +
-    //                                                  m_gripper_joint->GetChild()->GetName()
-    //                                            : "";
-    //     m_ros_pub_contact.publish(msg);
-    // }
-
     // read load cell force
     auto wrench = m_balloon_joint->GetForceTorque(0);
     auto fz = wrench.body1Force.Z();
@@ -176,11 +100,16 @@ return;
 
                 // set status to closed
                 m_gripper_status = GripperStatus::Closed;
-
-                // ROS_INFO_NAMED("UG", "closed!");
             }
         }
     }
+
+    // send status message
+    physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
+    ug_status_msg.set_activation_force(fz);
+    ug_status_msg.set_current_state(uint32_t(m_gripper_status));
+    ug_status_msg.set_next_state(uint32_t(m_gripper_status));
+    m_ug_status_pub->Publish(ug_status_msg);
 }
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
@@ -201,7 +130,7 @@ void UniversalGripper::CommandCallback(CommandPtr& msg)
     }
     if (msg->command() == 2)
     {
-        // tare
+        // TODO: tare
     }
 }
 

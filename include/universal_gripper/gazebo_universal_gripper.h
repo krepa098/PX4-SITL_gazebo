@@ -55,8 +55,6 @@ class UniversalGripper : public ModelPlugin
     GripperCommand m_gripper_next_command = GripperCommand::None;
 
     gazebo::common::Time m_release_time;
-    gazebo::common::Time m_last_status_sent;
-
 
     // Pointer to the update event connection
    private:
