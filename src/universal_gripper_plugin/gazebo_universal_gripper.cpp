@@ -1,4 +1,4 @@
-#include "universal_gripper/gazebo_universal_gripper.h"
+#include "universal_gripper_plugin/gazebo_universal_gripper.h"
 
 namespace gazebo
 {

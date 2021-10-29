@@ -39,7 +39,7 @@
         </contact>
       </surface>-->
     </link>
-    
+
     <link name="balloon">
       <pose frame="base_link">0 0 -0.02 0 0 0</pose>
       <inertial>
@@ -54,7 +54,7 @@
           <mass>0.1</mass>
        </inertial>
     </link>
-    
+
     <joint name="joint1" type="prismatic">
       <parent>base_link</parent>
       <child>balloon</child>
@@ -75,7 +75,7 @@
         </dynamics>
       </axis>
     </joint>
-       
+
     <!-- the cylindrical contact surface that can move in z-direction -->
     <link name="balloon_contact">
       <pose frame="balloon">0 0 -0.03 0 0 0</pose>
@@ -90,7 +90,7 @@
           </inertia>
           <mass>0.1</mass>
         </inertial>
-        <!-- 
+        <!--
         <visual name="visual">
           <geometry>
             <cylinder>
@@ -106,6 +106,14 @@
               <length>0.020</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
         <!-- disable physical collision -->
         <!-- <surface>
           <contact>
@@ -119,12 +127,12 @@
         </contact>
       </sensor>
     </link>
-    
+
     <joint name="balloon_joint" type="fixed">
       <parent>balloon</parent>
       <child>balloon_contact</child>
     </joint>
-      
+
   </model>
 </sdf>
 

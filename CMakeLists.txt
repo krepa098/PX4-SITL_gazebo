@@ -387,6 +387,7 @@ add_library(gazebo_catapult_plugin SHARED src/gazebo_catapult_plugin.cpp)
 add_library(gazebo_usv_dynamics_plugin SHARED src/gazebo_usv_dynamics_plugin.cpp)
 add_library(gazebo_parachute_plugin SHARED src/gazebo_parachute_plugin.cpp)
 add_library(gazebo_airship_dynamics_plugin SHARED src/gazebo_airship_dynamics_plugin.cpp)
+add_library(gazebo_universal_gripper_plugin SHARED src/universal_gripper_plugin/gazebo_universal_gripper.cpp)
 
 set(plugins
   gazebo_airspeed_plugin
@@ -413,6 +414,7 @@ set(plugins
   gazebo_usv_dynamics_plugin
   gazebo_parachute_plugin
   gazebo_airship_dynamics_plugin
+  gazebo_universal_gripper_plugin
   )
 
 foreach(plugin ${plugins})
@@ -424,10 +426,10 @@ target_link_libraries(gazebo_opticalflow_plugin ${OpticalFlow_LIBS})
 # Current plugins that can be used with ROS interface: gazebo_motor_failure_plugin
 if (BUILD_ROS_INTERFACE)
   add_library(gazebo_motor_failure_plugin SHARED src/gazebo_motor_failure_plugin.cpp)
-  add_library(universal_gripper_plugin SHARED src/universal_gripper/gazebo_universal_gripper.cpp)
+  add_library(gazebo_payload_plugin SHARED src/payload_plugin/gazebo_payload.cpp)
   target_link_libraries(gazebo_motor_failure_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
-  target_link_libraries(universal_gripper_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
-  list(APPEND plugins gazebo_motor_failure_plugin universal_gripper_plugin)
+  target_link_libraries(gazebo_payload_plugin ${GAZEBO_libraries} ${roscpp_LIBRARIES})
+  list(APPEND plugins gazebo_motor_failure_plugin gazebo_payload_plugin)
   message(STATUS "adding gazebo_motor_failure_plugin to build")
 
   include_directories(

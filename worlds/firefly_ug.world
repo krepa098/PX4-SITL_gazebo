@@ -38,14 +38,14 @@
       <magnetic_field>6.0e-6 2.3e-5 -4.2e-5</magnetic_field>
     </physics>
     <include>
-      <name>box_1</name>
+      <name>payload_1</name>
       <uri>model://payload_box</uri>
       <pose>0 0 0.1 0 0 0</pose>
     </include>
     <include>
-      <name>box_2</name>
+      <name>payload_2</name>
       <uri>model://payload_box</uri>
-      <pose>1 0 0.1 0 0 0</pose>
+      <pose>1 0.2 0.1 0 0 0</pose>
     </include>
   </world>
 </sdf>
