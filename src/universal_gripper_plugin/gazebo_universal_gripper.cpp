@@ -128,6 +128,8 @@ bool UniversalGripper::grip_contacting_link()
                 m_gripper_joint->Load(m_collision_link, c2->GetLink(), ignition::math::Pose3d());
                 m_gripper_joint->Init();
 
+                std::cout << "UG: attaching to '" << c2->GetLink()->GetName() << "'" << std::endl;
+
                 // success
                 return true;
             }
@@ -144,7 +146,6 @@ bool UniversalGripper::transition_finished() const
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
 {
-    std::cout << "GZ: Got Command " << msg->command() << std::endl;
     if (msg->command() == uint32_t(GripperCommand::Open))
     {
         // open
