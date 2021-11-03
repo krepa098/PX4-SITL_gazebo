@@ -53,6 +53,7 @@ class UniversalGripper : public ModelPlugin
     physics::JointPtr m_balloon_joint;
     physics::LinkPtr m_base_link;
     physics::LinkPtr m_collision_link;
+    physics::LinkPtr m_gripped_link;
 
     std::thread ros_queue_thread;
 

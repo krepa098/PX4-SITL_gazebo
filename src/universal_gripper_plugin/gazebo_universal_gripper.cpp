@@ -66,9 +66,10 @@ void UniversalGripper::OnUpdate()
         transition_finished())
     {
         // drop payload if we have one
-        if (m_gripper_joint->GetChild())
+        if (m_gripped_link)
         {
-            m_gripper_joint->RemoveChildren();
+            m_gripper_joint->Detach();
+            m_gripped_link = nullptr;
         }
         m_gripper_current_state = m_gripper_next_state;
     }
@@ -128,6 +129,8 @@ bool UniversalGripper::grip_contacting_link()
                 m_gripper_joint->Load(m_collision_link, c2->GetLink(), ignition::math::Pose3d());
                 m_gripper_joint->Init();
 
+                m_gripped_link = c2->GetLink();
+
                 std::cout << "UG: attaching to '" << c2->GetLink()->GetName() << "'" << std::endl;
 
                 // success
@@ -146,13 +149,13 @@ bool UniversalGripper::transition_finished() const
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
 {
-    if (msg->command() == uint32_t(GripperCommand::Open))
+    if (msg->command() == uint32_t(GripperCommand::Open) && m_gripper_next_state != GripperState::Open)
     {
         // open
         m_gripper_next_state = GripperState::Open;
         m_state_transition_time = m_model->GetWorld()->SimTime() + gazebo::common::Time(1.0);
     }
-    if (msg->command() == uint32_t(GripperCommand::Close))
+    if (msg->command() == uint32_t(GripperCommand::Close) && m_gripper_next_state != GripperState::Closed)
     {
         // close
         m_gripper_next_state = GripperState::Closed;
