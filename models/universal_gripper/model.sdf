@@ -3,7 +3,7 @@
   <model name="universal_gripper">
     <pose>0 0 0.2 0 0 0</pose>
     <static>false</static>
-    <plugin filename="libuniversal_gripper_plugin.so" name="universal_gripper_plugin"/>
+    <plugin filename="libgazebo_universal_gripper_plugin.so" name="universal_gripper_plugin"/>
     <link name="base_link">
       <pose>0 0 0 0 0 0</pose>
       <!--<collision name="collision">
