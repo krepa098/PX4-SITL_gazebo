@@ -56,21 +56,29 @@ void UniversalGripper::OnUpdate()
     auto wrench = m_balloon_joint->GetForceTorque(0);
     auto fz = -wrench.body1Force.Z();
 
-    if (m_gripper_command == GripperCommand::Open && m_gripper_current_state == GripperState::Closed && transition_finished()) {
-        // drop payload if we have one
-        if (m_gripper_joint->GetChild() && m_gripper_current_state == GripperState::Closed)
-        {
-            m_gripper_joint->RemoveChildren();
-            m_gripper_current_state = GripperState::Open;
-            m_gripper_command = GripperCommand::None;
-        }
+    if (m_gripper_current_state == GripperState::Unknown && m_gripper_next_state == GripperState::Open &&
+        transition_finished())
+    {
+        m_gripper_current_state = m_gripper_next_state;
     }
 
-    if (m_gripper_command == GripperCommand::Close && m_gripper_current_state == GripperState::Open && transition_finished()) {
+    if (m_gripper_current_state == GripperState::Closed && m_gripper_next_state == GripperState::Open &&
+        transition_finished())
+    {
+        // drop payload if we have one
+        if (m_gripper_joint->GetChild())
+        {
+            m_gripper_joint->RemoveChildren();
+        }
+        m_gripper_current_state = m_gripper_next_state;
+    }
+
+    if (m_gripper_current_state == GripperState::Open && m_gripper_next_state == GripperState::Closed &&
+        transition_finished())
+    {
         // grip payload if we have contact after transition phase
         grip_contacting_link();
-        m_gripper_current_state = GripperState::Closed;
-        m_gripper_command = GripperCommand::None;
+        m_gripper_current_state = m_gripper_next_state;
     }
 
     // send status message
@@ -81,7 +89,8 @@ void UniversalGripper::OnUpdate()
     m_ug_status_pub->Publish(ug_status_msg);
 }
 
-bool UniversalGripper::grip_contacting_link() {
+bool UniversalGripper::grip_contacting_link()
+{
     // gripping
     // ref: https://github.com/osrf/gazebo/blob/gazebo11/gazebo/physics/Gripper.cc
     auto contacts = m_model->GetWorld()->Physics()->GetContactManager()->GetContacts();
@@ -128,29 +137,30 @@ bool UniversalGripper::grip_contacting_link() {
     return false;
 }
 
-bool UniversalGripper::transition_finished() const {
+bool UniversalGripper::transition_finished() const
+{
     return (m_state_transition_time - m_model->GetWorld()->SimTime()).Double() < 0.0;
 }
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
 {
+    std::cout << "GZ: Got Command " << msg->command() << std::endl;
     if (msg->command() == uint32_t(GripperCommand::Open))
     {
         // open
-        m_gripper_command = GripperCommand::Open;
         m_gripper_next_state = GripperState::Open;
         m_state_transition_time = m_model->GetWorld()->SimTime() + gazebo::common::Time(1.0);
     }
     if (msg->command() == uint32_t(GripperCommand::Close))
     {
         // close
-        m_gripper_command = GripperCommand::Close;
         m_gripper_next_state = GripperState::Closed;
         m_state_transition_time = m_model->GetWorld()->SimTime() + gazebo::common::Time(4.0);
     }
     if (msg->command() == uint32_t(GripperCommand::Tare))
     {
         // TODO: tare
+        std::cout << "Universal Gripper: Tare not implemented" << std::endl;
     }
 }
 

@@ -13,19 +13,19 @@
 
 namespace gazebo
 {
-enum class GripperState
+enum class GripperState : uint32_t
 {
-    Unknown,
-    Open,
-    Closed,
+    Unknown = 0,
+    Open = 1,
+    Closed = 2,
 };
 
-enum class GripperCommand
+enum class GripperCommand : uint32_t
 {
-    Open,
-    Close,
-    Tare,
-    None,
+    Open = 0,
+    Close = 1,
+    Tare = 2,
+    None = 3,
 };
 
 class UniversalGripper : public ModelPlugin
@@ -59,7 +59,6 @@ class UniversalGripper : public ModelPlugin
     // real gripper starts in an undefined state
     GripperState m_gripper_current_state = GripperState::Unknown;
     GripperState m_gripper_next_state = GripperState::Unknown;
-    GripperCommand m_gripper_command = GripperCommand::None;
 
     gazebo::common::Time m_state_transition_time;
 
