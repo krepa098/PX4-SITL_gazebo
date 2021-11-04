@@ -25,10 +25,17 @@
         </inertia>
         <mass>0.1</mass>
       </inertial>
-      <visual name="visual">
+      <visual name="visual_open">
         <geometry>
           <mesh>
-           <uri>model://universal_gripper/meshes/universal_gripper.dae</uri>
+           <uri>model://universal_gripper/meshes/universal_gripper_open.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_closed">
+        <geometry>
+          <mesh>
+           <uri>model://universal_gripper/meshes/universal_gripper_closed.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -41,7 +48,7 @@
     </link>
 
     <link name="balloon">
-      <pose frame="base_link">0 0 -0.02 0 0 0</pose>
+      <pose frame="base_link">0 0 -0.010 0 0 0</pose>
       <inertial>
           <inertia>
             <ixx>0.00002</ixx>
@@ -65,7 +72,7 @@
         <xyz>0 0 1</xyz>
         <limit>
           <lower>0</lower>
-          <upper>0.02</upper>
+          <upper>0.015</upper>
           <!--<effort>3000</effort>-->
         </limit>
         <dynamics>
@@ -103,7 +110,7 @@
         <geometry>
           <cylinder>
             <radius>0.040</radius>
-              <length>0.020</length>
+              <length>0.002</length>
           </cylinder>
         </geometry>
         <surface>

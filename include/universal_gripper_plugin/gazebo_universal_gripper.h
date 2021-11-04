@@ -46,9 +46,9 @@ class UniversalGripper : public ModelPlugin
 
     bool transition_finished() const;
     bool grip_contacting_link();
+    void change_mesh();
 
     physics::ModelPtr m_model;
-    // physics::JointPtr m_attachement_joint;
     physics::JointPtr m_gripper_joint;
     physics::JointPtr m_balloon_joint;
     physics::LinkPtr m_base_link;
@@ -62,6 +62,7 @@ class UniversalGripper : public ModelPlugin
     GripperState m_gripper_next_state = GripperState::Unknown;
 
     gazebo::common::Time m_state_transition_time;
+    gazebo::common::Time m_last_visual_time;
 
     // Pointer to the update event connection
    private:
@@ -69,6 +70,7 @@ class UniversalGripper : public ModelPlugin
     transport::NodePtr m_node_handle;
     transport::PublisherPtr m_ug_status_pub;
     transport::SubscriberPtr m_ug_command_sub;
+    transport::PublisherPtr m_visual_pub;
 };
 
 }  // namespace gazebo

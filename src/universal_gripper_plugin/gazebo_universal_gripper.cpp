@@ -1,5 +1,8 @@
 #include "universal_gripper_plugin/gazebo_universal_gripper.h"
 
+#define MESH_CLOSED "model://universal_gripper/meshes/universal_gripper.dae"
+#define MESH_OPEN "model://universal_gripper/meshes/universal_gripper_open.dae"
+
 namespace gazebo
 {
 UniversalGripper::UniversalGripper() {}
@@ -21,8 +24,10 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
     m_node_handle = transport::NodePtr(new transport::Node());
     m_node_handle->Init(namespace_);
 
+    m_visual_pub = m_node_handle->Advertise<gazebo::msgs::Visual>("~/visual", 2);
+
     m_ug_status_pub =
-        m_node_handle->Advertise<physics_msgs::msgs::UniversalGripperStatus>("~/" + m_model->GetName() + "/status", 10);
+        m_node_handle->Advertise<physics_msgs::msgs::UniversalGripperStatus>("~/" + m_model->GetName() + "/status", 1);
     m_ug_command_sub =
         m_node_handle->Subscribe("~/" + m_model->GetName() + "/command", &UniversalGripper::CommandCallback, this);
 
@@ -48,6 +53,9 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     m_updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&UniversalGripper::OnUpdate, this));
+
+    m_visual_pub->WaitForConnection();
+    change_mesh();
 }
 
 void UniversalGripper::OnUpdate()
@@ -60,6 +68,7 @@ void UniversalGripper::OnUpdate()
         transition_finished())
     {
         m_gripper_current_state = m_gripper_next_state;
+        change_mesh();
     }
 
     if (m_gripper_current_state == GripperState::Closed && m_gripper_next_state == GripperState::Open &&
@@ -72,6 +81,7 @@ void UniversalGripper::OnUpdate()
             m_gripped_link = nullptr;
         }
         m_gripper_current_state = m_gripper_next_state;
+        change_mesh();
     }
 
     if (m_gripper_current_state == GripperState::Open && m_gripper_next_state == GripperState::Closed &&
@@ -80,6 +90,7 @@ void UniversalGripper::OnUpdate()
         // grip payload if we have contact after transition phase
         grip_contacting_link();
         m_gripper_current_state = m_gripper_next_state;
+        change_mesh();
     }
 
     // send status message
@@ -88,6 +99,47 @@ void UniversalGripper::OnUpdate()
     ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
     ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
     m_ug_status_pub->Publish(ug_status_msg);
+
+    change_mesh();
+}
+
+void UniversalGripper::change_mesh()
+{
+    gazebo::msgs::Visual msg_open = m_base_link->GetVisualMessage("visual_open");
+    gazebo::msgs::Visual msg_closed = m_base_link->GetVisualMessage("visual_closed");
+
+    // std::cout << msg_open.name() << msg_open.parent_name() << std::endl;
+
+    msg_open.set_name(m_base_link->GetScopedName() + "::visual_open");
+    msg_closed.set_name(m_base_link->GetScopedName() + "::visual_closed");
+    msg_open.set_parent_name(m_model->GetScopedName());
+    msg_closed.set_parent_name(m_model->GetScopedName());
+
+    switch (m_gripper_current_state)
+    {
+        case GripperState::Open:
+            msg_open.set_visible(true);
+            msg_closed.set_visible(false);
+            msg_open.set_transparency(0.0);
+            msg_closed.set_transparency(1.0);
+            break;
+        case GripperState::Closed:
+        case GripperState::Unknown:
+            msg_open.set_visible(false);
+            msg_closed.set_visible(true);
+            msg_open.set_transparency(1.0);
+            msg_closed.set_transparency(0.0);
+            break;
+    }
+
+    if ((m_model->GetWorld()->SimTime() - m_last_visual_time).Double() > 0.1)
+    {
+        m_last_visual_time = m_model->GetWorld()->SimTime();
+
+        // this is really finnicky
+        m_visual_pub->Publish(msg_open);
+        m_visual_pub->Publish(msg_closed);
+    }
 }
 
 bool UniversalGripper::grip_contacting_link()
