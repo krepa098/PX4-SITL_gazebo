@@ -108,8 +108,6 @@ void UniversalGripper::change_mesh()
     gazebo::msgs::Visual msg_open = m_base_link->GetVisualMessage("visual_open");
     gazebo::msgs::Visual msg_closed = m_base_link->GetVisualMessage("visual_closed");
 
-    // std::cout << msg_open.name() << msg_open.parent_name() << std::endl;
-
     msg_open.set_name(m_base_link->GetScopedName() + "::visual_open");
     msg_closed.set_name(m_base_link->GetScopedName() + "::visual_closed");
     msg_open.set_parent_name(m_model->GetScopedName());
