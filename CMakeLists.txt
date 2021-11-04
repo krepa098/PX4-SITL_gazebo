@@ -260,16 +260,16 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly/firefly.sdf
   DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
   )
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMAND rm -f ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
-  COMMAND ${PYTHON_EXECUTABLE} ${scripts_dir}/xacro.py -o  ${rotors_description_dir}/urdf/firefly_base.urdf  ${rotors_description_dir}/urdf/firefly_base.xacro enable_mavlink_interface:=${enable_mavlink_interface} enable_ground_truth:="true" enable_gps:="false" enable_wind:=${enable_wind} enable_logging:=${enable_logging} rotors_description_dir:=${rotors_description_dir} send_vision_estimation:=${send_vision_estimation} send_odometry:=${send_odometry}
-  COMMAND gz sdf -p  ${rotors_description_dir}/urdf/firefly_base.urdf >> ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
-  COMMAND sed -i \"s/model name='firefly'/model name='firefly_gt'/g\" ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
-  DEPENDS ${rotors_description_dir}/urdf/firefly.xacro
-  DEPENDS ${rotors_description_dir}/urdf/firefly_base.xacro
-  DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
-  )
+#add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
+#  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#  COMMAND rm -f ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
+#  COMMAND ${PYTHON_EXECUTABLE} ${scripts_dir}/xacro.py -o  ${rotors_description_dir}/urdf/firefly_base.urdf  ${rotors_description_dir}/urdf/firefly_base.xacro enable_mavlink_interface:=${enable_mavlink_interface} enable_ground_truth:="true" enable_gps:="false" enable_wind:="false" enable_logging:=${enable_logging} rotors_description_dir:=${rotors_description_dir} send_vision_estimation:="true" send_odometry:="true"
+#  COMMAND gz sdf -p  ${rotors_description_dir}/urdf/firefly_base.urdf >> ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
+#  COMMAND sed -i \"s/model name='firefly'/model name='firefly_gt'/g\" ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
+#  DEPENDS ${rotors_description_dir}/urdf/firefly.xacro
+#  DEPENDS ${rotors_description_dir}/urdf/firefly_base.xacro
+#  DEPENDS ${rotors_description_dir}/urdf/component_snippets.xacro
+#  )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_hil/firefly_hil.sdf
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -287,7 +287,7 @@ add_custom_target(sdf ALL DEPENDS
   ${CMAKE_CURRENT_SOURCE_DIR}/models/iris/iris.sdf
   ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly/firefly.sdf
   ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_hil/firefly_hil.sdf
-  ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
+  # ${CMAKE_CURRENT_SOURCE_DIR}/models/firefly_gt/firefly_gt.sdf
 )
 
 #-----------#
