@@ -69,7 +69,7 @@ void UniversalGripper::OnUpdate()
     auto wrench = m_balloon_joint->GetForceTorque(0);
     auto fz = -wrench.body1Force.Z();
 
-    const double alpha = 0.2;
+    const double alpha = 0.05;
 
     m_activation_force = fz * alpha + (1.0 - alpha) * m_activation_force;
 
