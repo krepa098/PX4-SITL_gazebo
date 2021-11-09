@@ -47,6 +47,7 @@ class UniversalGripper : public ModelPlugin
     bool transition_finished() const;
     bool grip_contacting_link();
     void change_mesh();
+    void check_contact();
 
     double m_joint_limit_lower = 0.0;
     double m_joint_limit_upper = 0.0;
@@ -59,6 +60,7 @@ class UniversalGripper : public ModelPlugin
     physics::LinkPtr m_base_link;
     physics::LinkPtr m_collision_link;
     physics::LinkPtr m_gripped_link;
+    physics::LinkPtr m_last_contact_link;
 
     std::thread ros_queue_thread;
 
@@ -68,6 +70,7 @@ class UniversalGripper : public ModelPlugin
 
     gazebo::common::Time m_state_transition_time;
     gazebo::common::Time m_last_visual_time;
+    gazebo::common::Time m_last_contact_time;
 
     // Pointer to the update event connection
    private:

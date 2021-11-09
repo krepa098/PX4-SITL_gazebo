@@ -115,6 +115,7 @@ void UniversalGripper::OnUpdate()
     m_ug_status_pub->Publish(ug_status_msg);
 
     change_mesh();
+    check_contact();
 }
 
 void UniversalGripper::change_mesh()
@@ -154,10 +155,8 @@ void UniversalGripper::change_mesh()
     }
 }
 
-bool UniversalGripper::grip_contacting_link()
+void UniversalGripper::check_contact()
 {
-    // gripping
-    // ref: https://github.com/osrf/gazebo/blob/gazebo11/gazebo/physics/Gripper.cc
     auto contacts = m_model->GetWorld()->Physics()->GetContactManager()->GetContacts();
     for (int i = 0; i < m_model->GetWorld()->Physics()->GetContactManager()->GetContactCount(); ++i)
     {
@@ -171,35 +170,36 @@ bool UniversalGripper::grip_contacting_link()
             if (c2->GetModel() == m_model)
                 std::swap(c1, c2);
 
-            // we can only grab if we haven't grabbed an object yet
-            if (!m_gripper_joint->GetChild())
-            {
-                // don't attach to static objects
-                if (c2->IsStatic())
-                    continue;
+            if (c2->IsStatic())
+                continue;
 
-                // check activation force
-                // if (fz < 0.3 * 9.81)
-                //     continue;
-
-                // init the joint with the newly gripped object as child
-                // note: the prismatic link is the springloaded disk that moves in z
-                m_gripper_joint->Load(m_collision_link, c2->GetLink(), ignition::math::Pose3d());
-                m_gripper_joint->Init();
-
-                m_gripped_link = c2->GetLink();
-
-                std::cout << "UG: attaching to '" << c2->GetLink()->GetName() << "'" << std::endl;
-
-                // block joint movement
-                double pos = m_prismatic_joint->Position();
-                m_prismatic_joint->SetUpperLimit(0, pos);
-                m_prismatic_joint->SetLowerLimit(0, pos);
-
-                // success
-                return true;
-            }
+            m_last_contact_link = c2->GetLink();
+            m_last_contact_time = m_model->GetWorld()->SimTime();
         }
+    }
+
+    if ((m_model->GetWorld()->SimTime() - m_last_contact_time).Double() > 0.01)
+    {
+        m_last_contact_link = physics::LinkPtr();
+    }
+}
+
+bool UniversalGripper::grip_contacting_link()
+{
+    if (m_last_contact_link)
+    {
+        m_gripper_joint->Load(m_collision_link, m_last_contact_link, ignition::math::Pose3d());
+        m_gripper_joint->Init();
+
+        std::cout << "UG: attaching to '" << m_last_contact_link->GetName() << "'" << std::endl;
+
+        // block joint movement
+        double pos = m_prismatic_joint->Position();
+        m_prismatic_joint->SetUpperLimit(0, pos);
+        m_prismatic_joint->SetLowerLimit(0, pos);
+
+        m_gripped_link = m_last_contact_link;
+        return true;
     }
 
     return false;
