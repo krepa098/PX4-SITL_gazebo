@@ -48,9 +48,13 @@ class UniversalGripper : public ModelPlugin
     bool grip_contacting_link();
     void change_mesh();
 
+    double m_joint_limit_lower = 0.0;
+    double m_joint_limit_upper = 0.0;
+
     physics::ModelPtr m_model;
     physics::JointPtr m_gripper_joint;
     physics::JointPtr m_balloon_joint;
+    physics::JointPtr m_prismatic_joint;
     physics::LinkPtr m_base_link;
     physics::LinkPtr m_collision_link;
     physics::LinkPtr m_gripped_link;

@@ -35,6 +35,7 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
     m_base_link = m_model->GetLink("universal_gripper::base_link");
     m_collision_link = m_model->GetLink("universal_gripper::balloon_contact");
     m_balloon_joint = m_model->GetJoint("universal_gripper::balloon_joint");
+    m_prismatic_joint = m_model->GetJoint("universal_gripper::joint1");
 
     if (!m_base_link)
         gzthrow("'universal_gripper::base_link' not found");
@@ -45,6 +46,10 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
 
     // enable feedback generation on that joint
     m_balloon_joint->SetProvideFeedback(true);
+
+    // store initial joint limits
+    m_joint_limit_lower = m_prismatic_joint->LowerLimit();
+    m_joint_limit_upper = m_prismatic_joint->UpperLimit();
 
     // create gripper joint
     m_gripper_joint = m_model->GetWorld()->Physics()->CreateJoint("fixed", m_model);
@@ -80,6 +85,11 @@ void UniversalGripper::OnUpdate()
             m_gripper_joint->Detach();
             m_gripped_link = nullptr;
         }
+
+        // lock joint in place
+        m_prismatic_joint->SetUpperLimit(0, m_joint_limit_upper);
+        m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
+
         m_gripper_current_state = m_gripper_next_state;
         change_mesh();
     }
@@ -157,14 +167,7 @@ bool UniversalGripper::grip_contacting_link()
             if (c2->GetModel() == m_model)
                 std::swap(c1, c2);
 
-            // ignore all links related to our attachement model
-            // if (m_attachement_joint->GetChild() && c2->GetModel() == m_attachement_joint->GetChild()->GetModel())
-            //     continue;
-
-            // gzdbg << "Gipping Link '" << c2->GetLink()->GetName() << "' of model '" << c2->GetModel()->GetName()
-            //       << "'" << std::endl;
-
-            // we can only grap if we haven't grapped an object yet
+            // we can only grab if we haven't grabbed an object yet
             if (!m_gripper_joint->GetChild())
             {
                 // don't attach to static objects
@@ -176,12 +179,18 @@ bool UniversalGripper::grip_contacting_link()
                 //     continue;
 
                 // init the joint with the newly gripped object as child
+                // note: the prismatic link is the springloaded disk that moves in z
                 m_gripper_joint->Load(m_collision_link, c2->GetLink(), ignition::math::Pose3d());
                 m_gripper_joint->Init();
 
                 m_gripped_link = c2->GetLink();
 
                 std::cout << "UG: attaching to '" << c2->GetLink()->GetName() << "'" << std::endl;
+
+                // block joint movement
+                double pos = m_prismatic_joint->Position();
+                m_prismatic_joint->SetUpperLimit(0, pos);
+                m_prismatic_joint->SetLowerLimit(0, pos);
 
                 // success
                 return true;
