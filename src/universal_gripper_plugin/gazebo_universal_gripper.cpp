@@ -69,6 +69,10 @@ void UniversalGripper::OnUpdate()
     auto wrench = m_balloon_joint->GetForceTorque(0);
     auto fz = -wrench.body1Force.Z();
 
+    const double alpha = 0.2;
+
+    m_activation_force = fz * alpha + (1.0 - alpha) * m_activation_force;
+
     if (m_gripper_current_state == GripperState::Unknown && m_gripper_next_state == GripperState::Open &&
         transition_finished())
     {
@@ -105,7 +109,7 @@ void UniversalGripper::OnUpdate()
 
     // send status message
     physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
-    ug_status_msg.set_activation_force(fz);
+    ug_status_msg.set_activation_force(m_activation_force);
     ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
     ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
     m_ug_status_pub->Publish(ug_status_msg);

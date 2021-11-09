@@ -50,6 +50,7 @@ class UniversalGripper : public ModelPlugin
 
     double m_joint_limit_lower = 0.0;
     double m_joint_limit_upper = 0.0;
+    double m_activation_force = 0.0;
 
     physics::ModelPtr m_model;
     physics::JointPtr m_gripper_joint;
