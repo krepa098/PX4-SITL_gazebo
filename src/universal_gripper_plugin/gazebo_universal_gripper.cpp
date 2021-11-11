@@ -73,36 +73,29 @@ void UniversalGripper::OnUpdate()
 
     m_activation_force = fz * alpha + (1.0 - alpha) * m_activation_force;
 
-    if (m_gripper_current_state == GripperState::Unknown && m_gripper_next_state == GripperState::Open &&
-        transition_finished())
+    if (m_gripper_current_state != m_gripper_next_state && transition_finished())
     {
-        m_gripper_current_state = m_gripper_next_state;
-        change_mesh();
-    }
-
-    if (m_gripper_current_state == GripperState::Closed && m_gripper_next_state == GripperState::Open &&
-        transition_finished())
-    {
-        // drop payload if we have one
-        if (m_gripped_link)
+        // opened the gripper
+        if (m_gripper_next_state == GripperState::Open)
         {
-            m_gripper_joint->Detach();
-            m_gripped_link = nullptr;
+            // drop payload if we have one
+            if (m_gripped_link)
+            {
+                m_gripper_joint->Detach();
+                m_gripped_link = nullptr;
+            }
+
+            // unlock joint
+            m_prismatic_joint->SetUpperLimit(0, m_joint_limit_upper);
+            m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
+        }
+        // closed the gripper
+        else if (m_gripper_next_state == GripperState::Closed)
+        {
+            // grip payload if we have contact after transition phase
+            grip_contacting_link();
         }
 
-        // lock joint in place
-        m_prismatic_joint->SetUpperLimit(0, m_joint_limit_upper);
-        m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
-
-        m_gripper_current_state = m_gripper_next_state;
-        change_mesh();
-    }
-
-    if (m_gripper_current_state == GripperState::Open && m_gripper_next_state == GripperState::Closed &&
-        transition_finished())
-    {
-        // grip payload if we have contact after transition phase
-        grip_contacting_link();
         m_gripper_current_state = m_gripper_next_state;
         change_mesh();
     }
@@ -114,7 +107,7 @@ void UniversalGripper::OnUpdate()
     ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
     m_ug_status_pub->Publish(ug_status_msg);
 
-    change_mesh();
+    // change_mesh();
     check_contact();
 }
 
@@ -212,6 +205,8 @@ bool UniversalGripper::transition_finished() const
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
 {
+    std::cout << "UG: cmd callback" << std::endl;
+
     if (msg->command() == uint32_t(GripperCommand::Open) && m_gripper_next_state != GripperState::Open)
     {
         // open
