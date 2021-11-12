@@ -138,14 +138,8 @@ void UniversalGripper::change_mesh()
             break;
     }
 
-    if ((m_model->GetWorld()->SimTime() - m_last_visual_time).Double() > 0.1)
-    {
-        m_last_visual_time = m_model->GetWorld()->SimTime();
-
-        // this is really finnicky
-        m_visual_pub->Publish(msg_open);
-        m_visual_pub->Publish(msg_closed);
-    }
+    m_visual_pub->Publish(msg_open, true);
+    m_visual_pub->Publish(msg_closed, true);
 }
 
 void UniversalGripper::check_contact()

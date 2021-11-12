@@ -69,7 +69,6 @@ class UniversalGripper : public ModelPlugin
     GripperState m_gripper_next_state = GripperState::Unknown;
 
     gazebo::common::Time m_state_transition_time;
-    gazebo::common::Time m_last_visual_time;
     gazebo::common::Time m_last_contact_time;
 
     // Pointer to the update event connection
