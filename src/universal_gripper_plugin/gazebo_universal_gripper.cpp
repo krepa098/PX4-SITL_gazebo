@@ -24,7 +24,7 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
     m_node_handle = transport::NodePtr(new transport::Node());
     m_node_handle->Init(namespace_);
 
-    m_visual_pub = m_node_handle->Advertise<gazebo::msgs::Visual>("~/visual", 2);
+    m_visual_pub = m_node_handle->Advertise<gazebo::msgs::Visual>("~/visual");
 
     m_ug_status_pub =
         m_node_handle->Advertise<physics_msgs::msgs::UniversalGripperStatus>("~/" + m_model->GetName() + "/status", 1);
@@ -60,7 +60,6 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
     m_updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&UniversalGripper::OnUpdate, this));
 
     m_visual_pub->WaitForConnection();
-    change_mesh();
 }
 
 void UniversalGripper::OnUpdate()
@@ -97,7 +96,6 @@ void UniversalGripper::OnUpdate()
         }
 
         m_gripper_current_state = m_gripper_next_state;
-        change_mesh();
     }
 
     // send status message
@@ -109,6 +107,7 @@ void UniversalGripper::OnUpdate()
 
     // change_mesh();
     check_contact();
+    change_mesh();
 }
 
 void UniversalGripper::change_mesh()
