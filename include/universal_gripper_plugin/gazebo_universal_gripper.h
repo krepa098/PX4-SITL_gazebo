@@ -65,8 +65,8 @@ class UniversalGripper : public ModelPlugin
     std::thread ros_queue_thread;
 
     // real gripper starts in an undefined state
-    GripperState m_gripper_current_state = GripperState::Unknown;
-    GripperState m_gripper_next_state = GripperState::Unknown;
+    GripperState m_gripper_current_state = GripperState::Closed;
+    GripperState m_gripper_next_state = GripperState::Closed;
 
     gazebo::common::Time m_state_transition_time;
     gazebo::common::Time m_last_contact_time;
