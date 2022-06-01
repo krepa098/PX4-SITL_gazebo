@@ -15,7 +15,7 @@ namespace gazebo
 {
 enum class GripperState : uint32_t
 {
-    Unknown = 0,
+    Unknown_Transition = 0,
     Open = 1,
     Closed = 2,
 };
@@ -52,6 +52,10 @@ class UniversalGripper : public ModelPlugin
     double m_joint_limit_lower = 0.0;
     double m_joint_limit_upper = 0.0;
     double m_activation_force = 0.0;
+    double m_beta = 1.0; // beta = 1 (open), beta = 0 (closed)
+    // discrete first order system
+    // https://val-sagrario.github.io/Dynamics%20of%20First%20Order%20Systems%20for%20game%20devs%20-%20Jan%202020.pdf
+    double m_tau = 4.9; // time constant (tau >> dt, a = dt / tau)
 
     physics::ModelPtr m_model;
     physics::JointPtr m_gripper_joint;
@@ -70,6 +74,7 @@ class UniversalGripper : public ModelPlugin
 
     gazebo::common::Time m_state_transition_time;
     gazebo::common::Time m_last_contact_time;
+    gazebo::common::Time m_update_time;
 
     // Pointer to the update event connection
    private:

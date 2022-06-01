@@ -64,18 +64,64 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
 
 void UniversalGripper::OnUpdate()
 {
+    // helper function
+    auto H = [](double x) {
+        if (x > 0)
+            return x;
+        else
+            return 0.0;
+    };
+
     // read load cell force
     auto wrench = m_balloon_joint->GetForceTorque(0);
+    auto joint_pos = m_balloon_joint->Position(); // [m]
     auto fz = -wrench.body1Force.Z();
 
+    // lp filter
     const double alpha = 0.05;
-
     m_activation_force = fz * alpha + (1.0 - alpha) * m_activation_force;
 
-    if (m_gripper_current_state != m_gripper_next_state && transition_finished())
+    // model constants
+    const double D = 30.0 / 1000.0; // [m]
+    const double a1 = 102.87;
+    const double a2 = 1.88;
+    const double a3 = 24868.56;
+    const double a4 = 1.29;
+    const double xua = 40.8 / 1000.0; // [m]
+    const double xl = 60.0 / 1000.0; // [m]
+
+    // position from the bottom [m]
+    double x = (m_prismatic_joint->UpperLimit() - joint_pos);
+
+    // calculate 'free length'
+    double xa = xua * (1.0 - m_beta);
+
+    // calculate force as identified on the real gripper
+    double f_air = a1 * D * std::pow(H(x), a2);
+    double f_lmp = a3 * std::pow(H(x-xa), a4);
+    double f = f_air + f_lmp; // [N]
+
+    // apply to joint
+    m_prismatic_joint->SetForce(0, f);
+
+    // adjust joint limit
+    m_prismatic_joint->SetUpperLimit(0, xa + (xl - xua));
+
+    // update gripper state based on beta
+    auto gripper_current_state = GripperState::Unknown_Transition;
+    if (m_beta < 0.02) {
+        m_gripper_current_state = GripperState::Closed;
+    } else if (m_beta > 0.98) {
+        m_gripper_current_state = GripperState::Open;
+    }
+
+    // state changed?
+    if (m_gripper_current_state != gripper_current_state)
     {
+        m_gripper_current_state = gripper_current_state;
+
         // opened the gripper
-        if (m_gripper_next_state == GripperState::Open)
+        if (m_gripper_current_state == GripperState::Open)
         {
             // drop payload if we have one
             if (m_gripped_link)
@@ -89,13 +135,11 @@ void UniversalGripper::OnUpdate()
             m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
         }
         // closed the gripper
-        else if (m_gripper_next_state == GripperState::Closed)
+        else if (m_gripper_current_state == GripperState::Closed)
         {
             // grip payload if we have contact after transition phase
             grip_contacting_link();
         }
-
-        m_gripper_current_state = m_gripper_next_state;
     }
 
     // send status message
@@ -108,6 +152,12 @@ void UniversalGripper::OnUpdate()
     // change_mesh();
     check_contact();
     change_mesh();
+
+    // update first order system
+    double xs = m_gripper_next_state == GripperState::Open ? 1.0 : 0.0;
+    double dt = (m_model->GetWorld()->SimTime() - m_update_time).Double();
+    double a = dt / m_tau;
+    m_beta = (1.0 - a) * m_beta + a * xs;
 }
 
 void UniversalGripper::change_mesh()
@@ -129,7 +179,7 @@ void UniversalGripper::change_mesh()
             msg_closed.set_transparency(1.0);
             break;
         case GripperState::Closed:
-        case GripperState::Unknown:
+        case GripperState::Unknown_Transition:
             msg_open.set_visible(false);
             msg_closed.set_visible(true);
             msg_open.set_transparency(1.0);
