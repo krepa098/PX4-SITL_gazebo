@@ -51,6 +51,9 @@ void UniversalGripper::Load(physics::ModelPtr parent, sdf::ElementPtr sdf)
     m_joint_limit_lower = m_prismatic_joint->LowerLimit();
     m_joint_limit_upper = m_prismatic_joint->UpperLimit();
 
+    // set initial position for the prismatic joint
+    m_prismatic_joint->SetPosition(0, m_joint_limit_upper);
+
     // create gripper joint
     m_gripper_joint = m_model->GetWorld()->Physics()->CreateJoint("fixed", m_model);
     m_gripper_joint->SetName("gripper_joint");
@@ -74,7 +77,7 @@ void UniversalGripper::OnUpdate()
 
     // read load cell force
     auto wrench = m_balloon_joint->GetForceTorque(0);
-    auto joint_pos = m_balloon_joint->Position(); // [m]
+    auto joint_pos = m_prismatic_joint->Position(); // distance from the top [m]
     auto fz = -wrench.body1Force.Z();
 
     // lp filter
@@ -82,7 +85,7 @@ void UniversalGripper::OnUpdate()
     m_activation_force = fz * alpha + (1.0 - alpha) * m_activation_force;
 
     // model constants
-    const double D = 30.0 / 1000.0; // [m]
+    const double D = 30.0; // [mm]
     const double a1 = 102.87;
     const double a2 = 1.88;
     const double a3 = 24868.56;
@@ -94,7 +97,7 @@ void UniversalGripper::OnUpdate()
     double x = (m_prismatic_joint->UpperLimit() - joint_pos);
 
     // calculate 'free length'
-    double xa = xua * (1.0 - m_beta);
+    double xa = xua * m_beta;
 
     // calculate force as identified on the real gripper
     double f_air = a1 * D * std::pow(H(x), a2);
@@ -105,14 +108,14 @@ void UniversalGripper::OnUpdate()
     m_prismatic_joint->SetForce(0, f);
 
     // adjust joint limit
-    m_prismatic_joint->SetUpperLimit(0, xa + (xl - xua));
+    m_prismatic_joint->SetUpperLimit(0, (xa + (xl - xua)));
 
     // update gripper state based on beta
     auto gripper_current_state = GripperState::Unknown_Transition;
-    if (m_beta < 0.02) {
-        m_gripper_current_state = GripperState::Closed;
-    } else if (m_beta > 0.98) {
-        m_gripper_current_state = GripperState::Open;
+    if (m_beta < 0.2) {
+        gripper_current_state = GripperState::Closed;
+    } else if (m_beta > 0.8) {
+        gripper_current_state = GripperState::Open;
     }
 
     // state changed?
@@ -131,8 +134,8 @@ void UniversalGripper::OnUpdate()
             }
 
             // unlock joint
-            m_prismatic_joint->SetUpperLimit(0, m_joint_limit_upper);
-            m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
+            // m_prismatic_joint->SetUpperLimit(0, m_joint_limit_upper);
+            // m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
         }
         // closed the gripper
         else if (m_gripper_current_state == GripperState::Closed)
@@ -144,7 +147,7 @@ void UniversalGripper::OnUpdate()
 
     // send status message
     physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
-    ug_status_msg.set_activation_force(m_activation_force);
+    ug_status_msg.set_activation_force(f);
     ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
     ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
     m_ug_status_pub->Publish(ug_status_msg);
@@ -158,6 +161,13 @@ void UniversalGripper::OnUpdate()
     double dt = (m_model->GetWorld()->SimTime() - m_update_time).Double();
     double a = dt / m_tau;
     m_beta = (1.0 - a) * m_beta + a * xs;
+    m_update_time = m_model->GetWorld()->SimTime();
+
+    // std::cout << "UG beta: " << m_beta
+    //           << " s: " << int(gripper_current_state)
+    //           << " xa: " << (xa * 1000.0)
+    //           << " ul: " << (m_prismatic_joint->UpperLimit(0) * 1000)
+    //           << " F: " << f <<  std::endl;
 }
 
 void UniversalGripper::change_mesh()
@@ -231,19 +241,14 @@ bool UniversalGripper::grip_contacting_link()
 
         // block joint movement
         double pos = m_prismatic_joint->Position();
-        m_prismatic_joint->SetUpperLimit(0, pos);
-        m_prismatic_joint->SetLowerLimit(0, pos);
+        // m_prismatic_joint->SetUpperLimit(0, pos);
+        // m_prismatic_joint->SetLowerLimit(0, pos);
 
         m_gripped_link = m_last_contact_link;
         return true;
     }
 
     return false;
-}
-
-bool UniversalGripper::transition_finished() const
-{
-    return (m_state_transition_time - m_model->GetWorld()->SimTime()).Double() < 0.0;
 }
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
@@ -254,13 +259,11 @@ void UniversalGripper::CommandCallback(CommandPtr& msg)
     {
         // open
         m_gripper_next_state = GripperState::Open;
-        m_state_transition_time = m_model->GetWorld()->SimTime() + gazebo::common::Time(1.0);
     }
     if (msg->command() == uint32_t(GripperCommand::Close) && m_gripper_next_state != GripperState::Closed)
     {
         // close
         m_gripper_next_state = GripperState::Closed;
-        m_state_transition_time = m_model->GetWorld()->SimTime() + gazebo::common::Time(4.0);
     }
     if (msg->command() == uint32_t(GripperCommand::Tare))
     {

@@ -50,39 +50,6 @@
       <gravity>1</gravity>
       <velocity_decay/>
     </link>
-    <joint name='/ground_truth/odometry_sensorgt_joint' type='revolute'>
-      <pose relative_to='base_link'>0 0 0 0 -0 0</pose>
-      <parent>base_link</parent>
-      <child>/ground_truth/odometry_sensorgt_link</child>
-      <axis>
-        <xyz>1 0 0</xyz>
-        <limit>
-          <lower>0</lower>
-          <upper>0</upper>
-          <effort>0</effort>
-          <velocity>0</velocity>
-        </limit>
-        <dynamics>
-          <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-        </dynamics>
-      </axis>
-    </joint>
-    <link name='/ground_truth/odometry_sensorgt_link'>
-      <pose relative_to='/ground_truth/odometry_sensorgt_joint'>0 0 0 0 -0 0</pose>
-      <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>1e-05</mass>
-        <inertia>
-          <ixx>1e-05</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>1e-05</iyy>
-          <iyz>0</iyz>
-          <izz>1e-05</izz>
-        </inertia>
-      </inertial>
-    </link>
     <joint name='/imu_joint' type='revolute'>
       <pose relative_to='base_link'>0 0 0 0 -0 0</pose>
       <parent>base_link</parent>
@@ -106,39 +73,6 @@
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.015</mass>
-        <inertia>
-          <ixx>1e-05</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>1e-05</iyy>
-          <iyz>0</iyz>
-          <izz>1e-05</izz>
-        </inertia>
-      </inertial>
-    </link>
-    <joint name='/imugt_joint' type='revolute'>
-      <pose relative_to='base_link'>0 0 0 0 -0 0</pose>
-      <parent>base_link</parent>
-      <child>/imugt_link</child>
-      <axis>
-        <xyz>1 0 0</xyz>
-        <limit>
-          <lower>0</lower>
-          <upper>0</upper>
-          <effort>0</effort>
-          <velocity>0</velocity>
-        </limit>
-        <dynamics>
-          <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-        </dynamics>
-      </axis>
-    </joint>
-    <link name='/imugt_link'>
-      <pose relative_to='/imugt_joint'>0 0 0 0 -0 0</pose>
-      <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>1e-05</mass>
         <inertia>
           <ixx>1e-05</ixx>
           <ixy>0</ixy>
@@ -646,6 +580,54 @@
       <motorSpeedPubTopic>/motor_speed/5</motorSpeedPubTopic>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
     </plugin>
+    <model name='gps0'>
+      <link name='link'>
+        <pose>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>2.1733e-06</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>2.1733e-06</iyy>
+            <iyz>0</iyz>
+            <izz>1.8e-07</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <cylinder>
+              <radius>0.01</radius>
+              <length>0.002</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Black</name>
+              <uri>__default__</uri>
+            </script>
+          </material>
+        </visual>
+        <sensor name='gps' type='gps'>
+          <pose>0 0 0 0 -0 0</pose>
+          <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
+            <robotNamespace/>
+            <gpsNoise>1</gpsNoise>
+            <gpsXYRandomWalk>2.0</gpsXYRandomWalk>
+            <gpsZRandomWalk>4.0</gpsZRandomWalk>
+            <gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
+            <gpsZNoiseDensity>0.0004</gpsZNoiseDensity>
+            <gpsVXYNoiseDensity>0.2</gpsVXYNoiseDensity>
+            <gpsVZNoiseDensity>0.4</gpsVZNoiseDensity>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+    <joint name='gps0_joint' type='fixed'>
+      <parent>base_link</parent>
+      <child>gps0::link</child>
+    </joint>
     <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
       <robotNamespace/>
     </plugin>
@@ -681,7 +663,7 @@
       <hil_mode>0</hil_mode>
       <hil_state_level>0</hil_state_level>
       <vehicle_is_tailsitter>0</vehicle_is_tailsitter>
-      <send_vision_estimation>1</send_vision_estimation>
+      <send_vision_estimation>0</send_vision_estimation>
       <send_odometry>1</send_odometry>
       <enable_lockstep>1</enable_lockstep>
       <use_tcp>1</use_tcp>
@@ -753,6 +735,7 @@
         </channel>
       </control_channels>
     </plugin>
+    <static>0</static>
     <plugin name='rotors_gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
       <robotNamespace/>
       <linkName>/imu_link</linkName>
@@ -765,41 +748,6 @@
       <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
       <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
       <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
-    </plugin>
-    <plugin name='rotors_gazebo_imugt_plugin' filename='libgazebo_imu_plugin.so'>
-      <robotNamespace/>
-      <linkName>/imugt_link</linkName>
-      <imuTopic>ground_truth/imu</imuTopic>
-      <gyroscopeNoiseDensity>0.0</gyroscopeNoiseDensity>
-      <gyroscopeRandomWalk>0.0</gyroscopeRandomWalk>
-      <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
-      <gyroscopeTurnOnBiasSigma>0.0</gyroscopeTurnOnBiasSigma>
-      <accelerometerNoiseDensity>0.0</accelerometerNoiseDensity>
-      <accelerometerRandomWalk>0.0</accelerometerRandomWalk>
-      <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
-      <accelerometerTurnOnBiasSigma>0.0</accelerometerTurnOnBiasSigma>
-    </plugin>
-    <static>0</static>
-    <plugin name='odometry_sensorgt' filename='librotors_gazebo_odometry_plugin.so'>
-      <linkName>/ground_truth/odometry_sensorgt_link</linkName>
-      <robotNamespace>/ground_truth</robotNamespace>
-      <poseTopic>pose</poseTopic>
-      <poseWithCovarianceTopic>pose_with_covariance</poseWithCovarianceTopic>
-      <positionTopic>position</positionTopic>
-      <transformTopic>transform</transformTopic>
-      <odometryTopic>odometry</odometryTopic>
-      <parentFrameId>world</parentFrameId>
-      <measurementDivisor>1</measurementDivisor>
-      <measurementDelay>0</measurementDelay>
-      <unknownDelay>0.0</unknownDelay>
-      <noiseNormalPosition>0 0 0</noiseNormalPosition>
-      <noiseNormalQuaternion>0 0 0</noiseNormalQuaternion>
-      <noiseNormalLinearVelocity>0 0 0</noiseNormalLinearVelocity>
-      <noiseNormalAngularVelocity>0 0 0</noiseNormalAngularVelocity>
-      <noiseUniformPosition>0 0 0</noiseUniformPosition>
-      <noiseUniformQuaternion>0 0 0</noiseUniformQuaternion>
-      <noiseUniformLinearVelocity>0 0 0</noiseUniformLinearVelocity>
-      <noiseUniformAngularVelocity>0 0 0</noiseUniformAngularVelocity>
     </plugin>
   </model>
 </sdf>

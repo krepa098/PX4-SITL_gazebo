@@ -44,7 +44,6 @@ class UniversalGripper : public ModelPlugin
    private:
     void CommandCallback(CommandPtr& msg);
 
-    bool transition_finished() const;
     bool grip_contacting_link();
     void change_mesh();
     void check_contact();
@@ -52,10 +51,10 @@ class UniversalGripper : public ModelPlugin
     double m_joint_limit_lower = 0.0;
     double m_joint_limit_upper = 0.0;
     double m_activation_force = 0.0;
-    double m_beta = 1.0; // beta = 1 (open), beta = 0 (closed)
+    double m_beta = 0.5; // beta = 1 (open), beta = 0 (closed)
     // discrete first order system
     // https://val-sagrario.github.io/Dynamics%20of%20First%20Order%20Systems%20for%20game%20devs%20-%20Jan%202020.pdf
-    double m_tau = 4.9; // time constant (tau >> dt, a = dt / tau)
+    double m_tau = 3.9; // time constant (tau >> dt, a = dt / tau)
 
     physics::ModelPtr m_model;
     physics::JointPtr m_gripper_joint;
@@ -72,7 +71,6 @@ class UniversalGripper : public ModelPlugin
     GripperState m_gripper_current_state = GripperState::Closed;
     GripperState m_gripper_next_state = GripperState::Closed;
 
-    gazebo::common::Time m_state_transition_time;
     gazebo::common::Time m_last_contact_time;
     gazebo::common::Time m_update_time;
 

@@ -5,17 +5,18 @@
       <pubRate>30</pubRate>
       <randomWalk>0.001</randomWalk>
       <noiseDensity>0.0001</noiseDensity>
-      <corellationTime>60.0</corellationTime>
+      <corellationTime>30.0</corellationTime>
     </plugin>
-    
+
     <include>
       <uri>model://firefly_gt</uri>
-      <pose>0 0 0.1 0 0 0</pose>
+      <pose>0 0 0.0 0 0 0</pose>
     </include>
- 
+
+
     <include>
       <uri>model://universal_gripper</uri>
-      <pose>0 0 0.05 0 0 0</pose>
+      <pose>0 0 -0.05 0 0 0</pose>
     </include>
     <joint name="ug_joint" type="fixed">
       <parent>firefly_gt::base_link</parent>
