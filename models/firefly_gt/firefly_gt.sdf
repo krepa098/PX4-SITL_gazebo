@@ -614,12 +614,12 @@
           <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
             <robotNamespace/>
             <gpsNoise>1</gpsNoise>
-            <gpsXYRandomWalk>2.0</gpsXYRandomWalk>
-            <gpsZRandomWalk>4.0</gpsZRandomWalk>
-            <gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
-            <gpsZNoiseDensity>0.0004</gpsZNoiseDensity>
-            <gpsVXYNoiseDensity>0.2</gpsVXYNoiseDensity>
-            <gpsVZNoiseDensity>0.4</gpsVZNoiseDensity>
+            <gpsXYRandomWalk>0.2</gpsXYRandomWalk>
+            <gpsZRandomWalk>0.4</gpsZRandomWalk>
+            <gpsXYNoiseDensity>0.00002</gpsXYNoiseDensity>
+            <gpsZNoiseDensity>0.00004</gpsZNoiseDensity>
+            <gpsVXYNoiseDensity>0.02</gpsVXYNoiseDensity>
+            <gpsVZNoiseDensity>0.04</gpsVZNoiseDensity>
           </plugin>
         </sensor>
       </link>
@@ -663,7 +663,7 @@
       <hil_mode>0</hil_mode>
       <hil_state_level>0</hil_state_level>
       <vehicle_is_tailsitter>0</vehicle_is_tailsitter>
-      <send_vision_estimation>0</send_vision_estimation>
+      <send_vision_estimation>1</send_vision_estimation>
       <send_odometry>1</send_odometry>
       <enable_lockstep>1</enable_lockstep>
       <use_tcp>1</use_tcp>
