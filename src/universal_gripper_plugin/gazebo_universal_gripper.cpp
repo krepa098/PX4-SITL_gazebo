@@ -104,7 +104,7 @@ void UniversalGripper::OnUpdate()
     double f_lmp = a3 * std::pow(H(x-xa), a4);
     double f = f_air + f_lmp; // [N]
 
-    // apply to joint
+    // apply force to joint
     m_prismatic_joint->SetForce(0, f);
 
     // adjust joint limit
@@ -146,11 +146,17 @@ void UniversalGripper::OnUpdate()
     }
 
     // send status message
-    physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
-    ug_status_msg.set_activation_force(f);
-    ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
-    ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
-    m_ug_status_pub->Publish(ug_status_msg);
+    // the real gripper samples the force at 10Hz
+    if ((m_model->GetWorld()->SimTime() - m_last_msg_time).Double() > 1.0 / m_msg_interval_hz)
+    {
+        m_last_msg_time = m_model->GetWorld()->SimTime();
+        physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
+        ug_status_msg.set_activation_force(f);
+        //std::cout << "force: " << f << std::endl;
+        ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
+        ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
+        m_ug_status_pub->Publish(ug_status_msg);
+    }
 
     // change_mesh();
     check_contact();
@@ -253,7 +259,7 @@ bool UniversalGripper::grip_contacting_link()
 
 void UniversalGripper::CommandCallback(CommandPtr& msg)
 {
-    std::cout << "UG: cmd callback" << std::endl;
+    // std::cout << "UG: cmd callback" << std::endl;
 
     if (msg->command() == uint32_t(GripperCommand::Open) && m_gripper_next_state != GripperState::Open)
     {
