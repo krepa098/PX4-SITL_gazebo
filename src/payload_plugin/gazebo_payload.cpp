@@ -43,9 +43,8 @@ class Payload : public ModelPlugin
 
         if (!ros::isInitialized())
         {
-            int argc = 0;
-            char** argv = NULL;
-            ros::init(argc, argv, "gazebo_client", ros::init_options::NoSigintHandler);
+            ROS_FATAL_STREAM("A ROS node for Gazebo has not been initialized");
+            return;
         }
 
         m_nh.reset(new ros::NodeHandle());
@@ -53,8 +52,6 @@ class Payload : public ModelPlugin
         m_pos_pub = m_nh->advertise<geometry_msgs::PoseStamped>(m_model->GetName() + "/pose", 8);
 
         m_ros_queue_thread = std::thread(std::bind(&Payload::QueueThread, this));
-
-        return;
     };
 
     void OnUpdate()
