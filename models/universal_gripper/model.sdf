@@ -76,8 +76,8 @@
           <!--<effort>3000</effort>-->
         </limit>
         <dynamics>
-          <!--<spring_reference>0</spring_reference>
-          <spring_stiffness>100</spring_stiffness>
+          <spring_reference>0</spring_reference>
+          <!-- <spring_stiffness>100</spring_stiffness>
           <damping>0.7</damping> -->
         </dynamics>
       </axis>

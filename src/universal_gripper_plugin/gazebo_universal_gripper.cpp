@@ -80,10 +80,6 @@ void UniversalGripper::OnUpdate()
     auto joint_pos = m_prismatic_joint->Position(); // distance from the top [m]
     auto fz = -wrench.body1Force.Z();
 
-    // lp filter
-    const double alpha = 0.05;
-    m_activation_force = fz * alpha + (1.0 - alpha) * m_activation_force;
-
     // model constants
     const double D = 30.0; // [mm]
     const double a1 = 102.87;
@@ -145,19 +141,6 @@ void UniversalGripper::OnUpdate()
         }
     }
 
-    // send status message
-    // the real gripper samples the force at 10Hz
-    if ((m_model->GetWorld()->SimTime() - m_last_msg_time).Double() > 1.0 / m_msg_interval_hz)
-    {
-        m_last_msg_time = m_model->GetWorld()->SimTime();
-        physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
-        ug_status_msg.set_activation_force(f);
-        //std::cout << "force: " << f << std::endl;
-        ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
-        ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
-        m_ug_status_pub->Publish(ug_status_msg);
-    }
-
     // change_mesh();
     check_contact();
     change_mesh();
@@ -168,6 +151,20 @@ void UniversalGripper::OnUpdate()
     double a = dt / m_tau;
     m_beta = (1.0 - a) * m_beta + a * xs;
     m_update_time = m_model->GetWorld()->SimTime();
+
+    // send status message
+    // the real gripper samples the force at 10Hz
+    if ((m_model->GetWorld()->SimTime() - m_last_msg_time).Double() > 1.0 / m_msg_interval_hz)
+    {
+        m_last_msg_time = m_model->GetWorld()->SimTime();
+        physics_msgs::msgs::UniversalGripperStatus ug_status_msg;
+        ug_status_msg.set_activation_force(f);
+        //std::cout << "force: " << f << std::endl;
+        ug_status_msg.set_current_state(uint32_t(m_gripper_current_state));
+        ug_status_msg.set_next_state(uint32_t(m_gripper_next_state));
+        ug_status_msg.set_beta(m_beta);
+        m_ug_status_pub->Publish(ug_status_msg);
+    }
 
     // std::cout << "UG beta: " << m_beta
     //           << " s: " << int(gripper_current_state)

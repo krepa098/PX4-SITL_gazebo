@@ -72,7 +72,7 @@
 #include <ignition/math.hh>
 #include <sdf/sdf.hh>
 
-#include <mavlink/v2.0/common/mavlink.h>
+#include <mavlink/v2.0/standard/mavlink.h>
 #include "msgbuffer.h"
 
 static const uint32_t kDefaultMavlinkUdpPort = 14560;

@@ -74,7 +74,7 @@ class UniversalGripper : public ModelPlugin
     gazebo::common::Time m_last_contact_time;
     gazebo::common::Time m_update_time;
     gazebo::common::Time m_last_msg_time;
-    double m_msg_interval_hz = 10.0;
+    double m_msg_interval_hz = 100.0;
 
     // Pointer to the update event connection
    private:

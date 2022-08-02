@@ -1418,6 +1418,7 @@ void GazeboMavlinkInterface::UGStatusCallback(UGStatusPtr& ug_status_msg)
 {
     mavlink_universal_gripper_status_gazebo_t ug_status_gz;
     ug_status_gz.activation_force = ug_status_msg->activation_force();
+    ug_status_gz.beta = ug_status_msg->beta();
     ug_status_gz.current_state = ug_status_msg->current_state();
     ug_status_gz.next_state = ug_status_msg->next_state();
 
