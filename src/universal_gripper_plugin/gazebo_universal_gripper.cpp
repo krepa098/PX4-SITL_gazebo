@@ -3,6 +3,8 @@
 #define MESH_CLOSED "model://universal_gripper/meshes/universal_gripper.dae"
 #define MESH_OPEN "model://universal_gripper/meshes/universal_gripper_open.dae"
 
+#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
+
 namespace gazebo
 {
 UniversalGripper::UniversalGripper() {}
@@ -78,6 +80,7 @@ void UniversalGripper::OnUpdate()
     // read load cell force
     auto wrench = m_balloon_joint->GetForceTorque(0);
     auto joint_pos = m_prismatic_joint->Position(); // distance from the top [m]
+    auto joint_vel = m_prismatic_joint->GetVelocity(0); // velocity [m/s]
     auto fz = -wrench.body1Force.Z();
 
     // model constants
@@ -93,18 +96,20 @@ void UniversalGripper::OnUpdate()
     double x = (m_prismatic_joint->UpperLimit() - joint_pos);
 
     // calculate 'free length'
-    double xa = xua * m_beta;
+    double xa = xua * (1.0 - m_beta);
 
     // calculate force as identified on the real gripper
-    double f_air = a1 * D * std::pow(H(x), a2);
-    double f_lmp = a3 * std::pow(H(x-xa), a4);
-    double f = f_air + f_lmp; // [N]
+    double f_air = a1 * D * std::pow(H(x), a2) - CLAMP(0.0 * MAX(joint_vel, 0.0), -50, 50);
+    double f_lmp = a3 * std::pow(H(x), a4);
+    double f = m_beta * f_air + (1.0 - m_beta) * f_lmp; // [N]
 
     // apply force to joint
     m_prismatic_joint->SetForce(0, f);
 
+    //printf("x=%.2f, dx=%.2f, f=%.2f\n", joint_pos, joint_vel, f);
+
     // adjust joint limit
-    m_prismatic_joint->SetUpperLimit(0, (xa + (xl - xua)));
+    m_prismatic_joint->SetUpperLimit(0, m_beta * xl + (1.0-m_beta) * (xl - xua) );
 
     // update gripper state based on beta
     auto gripper_current_state = GripperState::Unknown_Transition;

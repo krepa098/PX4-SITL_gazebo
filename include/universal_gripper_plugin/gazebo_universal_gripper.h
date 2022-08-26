@@ -51,7 +51,7 @@ class UniversalGripper : public ModelPlugin
     double m_joint_limit_lower = 0.0;
     double m_joint_limit_upper = 0.0;
     double m_activation_force = 0.0;
-    double m_beta = 0.5; // beta = 1 (open), beta = 0 (closed)
+    double m_beta = 0.0; // beta = 1 (open), beta = 0 (closed)
     // discrete first order system
     // https://val-sagrario.github.io/Dynamics%20of%20First%20Order%20Systems%20for%20game%20devs%20-%20Jan%202020.pdf
     double m_tau = 3.9; // time constant (tau >> dt, a = dt / tau)

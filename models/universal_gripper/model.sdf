@@ -65,26 +65,29 @@
     <joint name="joint1" type="prismatic">
       <parent>base_link</parent>
       <child>balloon</child>
+      <!--
       <sensor name="load_cell" type="force_torque">
         <visualize>true</visualize>
-      </sensor>
+      </sensor>-->
       <axis>
         <xyz>0 0 -1</xyz>
         <limit>
           <lower>0</lower>
-          <upper>0.6</upper>
+          <upper>0.06</upper>
           <!--<effort>3000</effort>-->
         </limit>
         <dynamics>
-          <spring_reference>0</spring_reference>
-          <!-- <spring_stiffness>100</spring_stiffness>
-          <damping>0.7</damping> -->
+          <!--<spring_reference>0</spring_reference>
+          <spring_stiffness>100</spring_stiffness>-->
+          <damping>0</damping>
+          <friction>0</friction>
         </dynamics>
       </axis>
     </joint>
 
     <!-- the cylindrical contact surface that can move in z-direction -->
     <link name="balloon_contact">
+      <gravity>0</gravity>
       <pose frame="balloon">0 0 -0.0 0 0 0</pose>
         <inertial>
           <inertia>
@@ -95,7 +98,7 @@
             <iyz>0</iyz>
             <izz>0.0002</izz>
           </inertia>
-          <mass>0.1</mass>
+          <mass>0.01</mass>
         </inertial>
         <!--
         <visual name="visual">
@@ -114,12 +117,26 @@
           </cylinder>
         </geometry>
         <surface>
+          <bounce>
+            <restitution_coefficient>0.000000</restitution_coefficient>
+            <threshold>100000.000000</threshold>
+          </bounce>
           <contact>
             <ode>
-              <max_vel>0.1</max_vel>
-              <min_depth>0.001</min_depth>
+              <soft_cfm>0.000000</soft_cfm>
+              <soft_erp>0.200000</soft_erp>
+              <kp>1000000000.000000</kp>
+              <kd>1.000000</kd>
+              <max_vel>100.000000</max_vel>
+              <min_depth>0.001000</min_depth>
             </ode>
           </contact>
+          <friction>
+            <ode>
+              <mu>200</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
         </surface>
         <!-- disable physical collision -->
         <!-- <surface>

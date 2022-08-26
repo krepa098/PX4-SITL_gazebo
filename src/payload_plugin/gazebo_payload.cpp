@@ -8,6 +8,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <ros/callback_queue.h>
 #include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
 
 namespace gazebo
 {

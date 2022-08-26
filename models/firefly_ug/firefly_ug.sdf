@@ -31,7 +31,8 @@
     <!-- modified from: https://github.com/mzahana/realsense_gazebo_plugin/blob/kinetic-devel/urdf/d435.sdf -->
     <model name='d435'>
       <link name='camera_bottom_screw_frame'>
-        <pose frame=''>0 0.22 -0.025 0 0.6981317008 -1.570796327</pose>
+        <!--<pose frame=''>0 0.22 -0.025 0 0.6981317008 -1.570796327</pose>--> <!-- 40° -->
+        <pose frame=''>0 0.22 -0.025 0 0.9599310886 -1.570796327</pose>  <!-- 55° -->
         <inertial>
           <pose frame=''>0 0.0175 0.0125 0 -0 0</pose>
           <mass>0.072</mass>

@@ -614,12 +614,12 @@
           <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
             <robotNamespace/>
             <gpsNoise>1</gpsNoise>
-            <gpsXYRandomWalk>0.2</gpsXYRandomWalk>
-            <gpsZRandomWalk>0.4</gpsZRandomWalk>
-            <gpsXYNoiseDensity>0.00002</gpsXYNoiseDensity>
-            <gpsZNoiseDensity>0.00004</gpsZNoiseDensity>
-            <gpsVXYNoiseDensity>0.02</gpsVXYNoiseDensity>
-            <gpsVZNoiseDensity>0.04</gpsVZNoiseDensity>
+            <gpsXYRandomWalk>0.0</gpsXYRandomWalk>
+            <gpsZRandomWalk>0.0</gpsZRandomWalk>
+            <gpsXYNoiseDensity>0.00000</gpsXYNoiseDensity>
+            <gpsZNoiseDensity>0.00000</gpsZNoiseDensity>
+            <gpsVXYNoiseDensity>0.00</gpsVXYNoiseDensity>
+            <gpsVZNoiseDensity>0.00</gpsVZNoiseDensity>
           </plugin>
         </sensor>
       </link>
