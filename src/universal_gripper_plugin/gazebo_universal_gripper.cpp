@@ -124,25 +124,22 @@ void UniversalGripper::OnUpdate()
     {
         m_gripper_current_state = gripper_current_state;
 
-        // opened the gripper
-        if (m_gripper_current_state == GripperState::Open)
-        {
-            // drop payload if we have one
-            if (m_gripped_link)
-            {
-                m_gripper_joint->Detach();
-                m_gripped_link = nullptr;
-            }
-
-            // unlock joint
-            // m_prismatic_joint->SetUpperLimit(0, m_joint_limit_upper);
-            // m_prismatic_joint->SetLowerLimit(0, m_joint_limit_lower);
-        }
         // closed the gripper
-        else if (m_gripper_current_state == GripperState::Closed)
+        if (m_gripper_current_state == GripperState::Closed && m_gripper_next_state == GripperState::Closed)
         {
             // grip payload if we have contact after transition phase
             grip_contacting_link();
+        }
+    }
+
+    // opened the gripper
+    if (m_gripper_current_state == GripperState::Closed && m_gripper_next_state == GripperState::Open)
+    {
+        // drop payload if we have one
+        if (m_gripped_link)
+        {
+            m_gripper_joint->Detach();
+            m_gripped_link = nullptr;
         }
     }
 
